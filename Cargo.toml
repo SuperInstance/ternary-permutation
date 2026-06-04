@@ -1,0 +1,9 @@
+[package]
+name = "ternary-permutation"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Permutation groups acting on ternary vectors: composition, inverse, orbits, stabilizers, cycle decomposition, symmetric group generators"
+repository = "https://github.com/SuperInstance/ternary-permutation"
+keywords = ["ternary", "permutation", "group-theory", "algebra"]
+categories = ["mathematics", "algorithms"]
