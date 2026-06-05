@@ -115,3 +115,11 @@ fn main() {
 ## License
 
 MIT
+
+## See Also
+- **ternary-tuple** — related
+- **ternary-codes** — related
+- **ternary-ring** — related
+- **ternary-transform** — related
+- **ternary-search** — related
+
