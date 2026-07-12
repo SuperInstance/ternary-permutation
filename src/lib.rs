@@ -544,7 +544,7 @@ mod tests {
         // Since g fixes 2, the entire generated group <g> = {id, (0 1)} fixes 2,
         // so the stabilizer of 2 equals <g> and is non-trivial.
         let g = Permutation::new(&[1, 0, 2]);
-        let stab = Permutation::stabilizer_generators(2, &[g.clone()]);
+        let stab = Permutation::stabilizer_generators(2, std::slice::from_ref(&g));
         assert!(
             !stab.is_empty(),
             "stabilizer of a point fixed by a non-trivial group must be non-empty"
