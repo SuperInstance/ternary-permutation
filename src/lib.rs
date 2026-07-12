@@ -23,7 +23,10 @@ impl Permutation {
         let mut seen = vec![false; n];
         for &v in images {
             if v >= n || seen[v] {
-                panic!("Invalid permutation: not a bijection of {{0,...,{}}}", n - 1);
+                panic!(
+                    "Invalid permutation: not a bijection of {{0,...,{}}}",
+                    n - 1
+                );
             }
             seen[v] = true;
         }
@@ -44,6 +47,12 @@ impl Permutation {
         self.images.len()
     }
 
+    /// Returns true if this permutation acts on zero elements (the empty
+    /// permutation of degree 0).
+    pub fn is_empty(&self) -> bool {
+        self.images.is_empty()
+    }
+
     /// Returns true if this is the identity permutation.
     pub fn is_identity(&self) -> bool {
         self.images.iter().enumerate().all(|(i, &v)| i == v)
@@ -56,8 +65,14 @@ impl Permutation {
 
     /// Compose self with other: (self ∘ other)(i) = self(other(i)).
     pub fn compose(&self, other: &Permutation) -> Permutation {
-        assert_eq!(self.len(), other.len(), "Permutations must have same degree");
-        let images: Vec<usize> = (0..self.len()).map(|i| self.apply(other.apply(i))).collect();
+        assert_eq!(
+            self.len(),
+            other.len(),
+            "Permutations must have same degree"
+        );
+        let images: Vec<usize> = (0..self.len())
+            .map(|i| self.apply(other.apply(i)))
+            .collect();
         Permutation { images }
     }
 
@@ -72,18 +87,19 @@ impl Permutation {
     }
 
     /// Compute the order (smallest positive k such that σ^k = identity).
+    ///
+    /// The order equals the least common multiple of the cycle lengths, which is
+    /// computed exactly and in O(n) time. This avoids the previous approach of
+    /// iterating `p, p², p³, …` up to an `n² + 1` bound, which panicked
+    /// spuriously for valid permutations whose order exceeds `n² + 1` (first
+    /// occurring at degree 25, e.g. a product of cycles of length 4·5·7·9 has
+    /// order 1260 > 25² + 1 = 626).
     pub fn order(&self) -> usize {
-        let id = Permutation::identity(self.len());
-        let mut current = self.clone();
-        let mut k = 1usize;
-        while current != id {
-            current = self.compose(&current);
-            k += 1;
-            if k > self.len().pow(2) + 1 {
-                panic!("Order computation exceeded reasonable bound");
-            }
+        let cycles = self.cycle_decomposition();
+        if cycles.is_empty() {
+            return 1; // identity: every element is a fixed point (no cycles > 1)
         }
-        k
+        cycles.iter().map(|c| c.len()).fold(1usize, lcm)
     }
 
     /// Cycle decomposition. Returns a vector of cycles, each cycle is a Vec<usize>.
@@ -214,7 +230,9 @@ impl Permutation {
         let mut result = Vec::new();
         let mut images: Vec<usize> = (0..n).collect();
         loop {
-            result.push(Permutation { images: images.clone() });
+            result.push(Permutation {
+                images: images.clone(),
+            });
             // Next permutation (lexicographic)
             if !next_perm(&mut images) {
                 break;
@@ -306,6 +324,25 @@ fn next_perm(arr: &mut [usize]) -> bool {
     true
 }
 
+/// Greatest common divisor (Euclidean algorithm).
+fn gcd(mut a: usize, mut b: usize) -> usize {
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    a
+}
+
+/// Least common multiple. Returns 0 if either argument is 0.
+fn lcm(a: usize, b: usize) -> usize {
+    if a == 0 || b == 0 {
+        0
+    } else {
+        a / gcd(a, b) * b
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -350,7 +387,7 @@ mod tests {
         assert_eq!(inv.apply(0), 1); // p(1)=0
         assert_eq!(inv.apply(1), 2); // p(2)=1
         assert_eq!(inv.apply(2), 0); // p(0)=2
-        // p ∘ p^{-1} = identity
+                                     // p ∘ p^{-1} = identity
         let id = p.compose(&inv);
         assert!(id.is_identity());
     }
