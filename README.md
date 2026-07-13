@@ -91,11 +91,11 @@ fn main() {
 
 **Inverse** builds the reverse mapping: if `p(i) = j`, then `p⁻¹(j) = i`.
 
-**Order** iterates `p, p², p³, ...` until the identity is recovered. The order of any permutation of `n` elements divides `n!`.
+**Order** is the least common multiple of the cycle lengths (computed exactly in `O(n)`). The order of any permutation of `n` elements divides `n!`.
 
-**Cycle decomposition** traces orbits of individual elements. Fixed points (1-cycles) are omitted. The sign is +1 if all cycles have odd length, −1 if any cycle has even length.
+**Cycle decomposition** traces orbits of individual elements. Fixed points (1-cycles) are omitted. A cycle of length `k` has sign `(-1)^(k-1)`, so the overall sign is `+1` (even) iff there is an even number of even-length cycles. For example `(0 1)(2 3)` — two even-length cycles — is an **even** permutation (`+1`).
 
-**Orbit computation** uses BFS: starting from element `i`, repeatedly apply all generators to discover reachable elements.
+**Orbit computation** uses a graph traversal: starting from element `i`, repeatedly apply all generators to discover reachable elements.
 
 **Stabilizer generators** use Schreier's lemma: for each orbit element `o` and each generator `g`, the Schreier generator is `rep(g(o))⁻¹ ∘ g ∘ rep(o)`. These generate the stabilizer subgroup.
 
